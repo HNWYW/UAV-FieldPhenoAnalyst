@@ -1,0 +1,5 @@
+{
+  "GCI": "(NIR/Green) - 1",
+  "BNDVI": "(NIR - Blue) / (NIR + Blue)",
+  "GVI": "Green / (NIR + Green + Red)"
+}

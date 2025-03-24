@@ -1,0 +1,88 @@
+
+
+===== 2025-02-23 07:11:02 =====
+ROSAVI 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_index_tab.py", line 444, in process_data
+    formula_func = index_data['formula']
+KeyError: 'formula'
+
+
+===== 2025-02-26 04:45:56 =====
+Custom_1 无有效统计数据
+Custom_1 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 608, in process_data
+    raise ValueError(error_msg)
+ValueError: Custom_1 无有效统计数据
+
+
+===== 2025-02-26 05:17:41 =====
+tyu 无有效统计数据
+tyu 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 720, in process_data
+    raise ValueError(error_msg)
+ValueError: tyu 无有效统计数据
+
+
+===== 2025-02-26 05:17:52 =====
+tyu 无有效统计数据
+tyu 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 720, in process_data
+    raise ValueError(error_msg)
+ValueError: tyu 无有效统计数据
+
+
+===== 2025-02-26 05:19:47 =====
+OSAVI 无有效统计数据
+OSAVI 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 720, in process_data
+    raise ValueError(error_msg)
+ValueError: OSAVI 无有效统计数据
+
+
+===== 2025-02-26 05:23:11 =====
+NDVI 计算失败：
+公式：(近红外 - 红) / (近红外 + 红)
+NDVI 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 442, in formula_func
+    result = eval(current_formula, {}, validated_kwargs)
+  File "<string>", line 1, in <module>
+NameError: name '近红外' is not defined
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 653, in process_data
+    result = formula_func(**params)
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 448, in formula_func
+    return np.full_like(next(iter(validated_kwargs.values())), np.nan)
+StopIteration
+
+
+===== 2025-02-26 05:30:45 =====
+Custom_1 无有效统计数据
+Custom_1 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 720, in process_data
+    raise ValueError(error_msg)
+ValueError: Custom_1 无有效统计数据
+
+
+===== 2025-02-26 05:36:02 =====
+Custom_1 计算失败：计算结果全为无效值，请检查公式和输入波段
+公式：(NIR - Red) / (NIR + Red + 0.001)
+Custom_1 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 663, in process_data
+    raise ValueError("计算结果全为无效值，请检查公式和输入波段")
+ValueError: 计算结果全为无效值，请检查公式和输入波段
+
+
+===== 2025-02-26 05:44:29 =====
+Custom_1 处理失败：Traceback (most recent call last):
+  File "c:\Users\ASUS\Desktop\指数计算部分\custom_vegetation_index_tab.py", line 698, in process_data
+    gdf_filtered = gdf[gdf.geometry.intersects(src.bounds)].to_crs(src.crs)
+  File "C:\Users\ASUS\anaconda3\envs\AIE35\lib\site-packages\geopandas\base.py", line 1421, in intersects
+    return _binary_op("intersects", self, other, align)
+  File "C:\Users\ASUS\anaconda3\envs\AIE35\lib\site-packages\geopandas\base.py", line 59, in _binary_op
+    data, index = _delegate_binary_method(op, this, other, align, *args, **kwargs)
+  File "C:\Users\ASUS\anaconda3\envs\AIE35\lib\site-packages\geopandas\base.py", line 41, in _delegate_binary_method
+    raise TypeError(type(this), type(other))
+TypeError: (<class 'geopandas.geoseries.GeoSeries'>, <class 'rasterio.coords.BoundingBox'>)
