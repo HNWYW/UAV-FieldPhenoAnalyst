@@ -13,20 +13,19 @@ class PhenotypeInversionTab(QWidget):
 
     def __init__(self):
         super().__init__()
+        # 修改后的模型结构（关键修改1）
         self.models = {
             "早稻": {
-                "冠层SPAD值（幼穗分化期）": "models/early/spad.joblib",
-                "叶片氮积累量（幼穗分化期）": "models/early/leaf_n.joblib",
-                "植株氮积累量（幼穗分化期）": "models/early/stem_n.joblib",
-                "地上部生物量（抽穗期）": "models/early/biomass.joblib",
-                "籽粒产量": "models/early/yield.joblib"
+                "冠层SPAD值（SPAD，幼穗分化期）": "幼穗分化期_早稻_SPAD_trained_model.pkl",
+                "叶片氮积累量（LNA，幼穗分化期）": "幼穗分化期_早稻_LNA_trained_model.pkl",
+                "植株氮积累量（PNA，幼穗分化期）": "幼穗分化期_早稻_PNA_trained_model.pkl",
+                "地上部生物量（AGB，抽穗期）": "抽穗期_早稻_AGB_trained_model.pkl"
             },
             "晚稻": {
-                "冠层SPAD值（幼穗分化期）": "models/late/spad.joblib",
-                "叶片氮积累量（幼穗分化期）": "models/late/leaf_n.joblib",
-                "植株氮积累量（幼穗分化期）": "models/late/stem_n.joblib",
-                "地上部生物量（抽穗期）": "models/late/biomass.joblib",
-                "籽粒产量": "models/late/yield.joblib"
+                "冠层SPAD值（SPAD，幼穗分化期）": "幼穗分化期_晚稻_SPAD_trained_model.pkl",
+                "叶片氮积累量（LNA，幼穗分化期）": "幼穗分化期_晚稻_LNA_trained_model.pkl",
+                "植株氮积累量（PNA，幼穗分化期）": "幼穗分化期_晚稻_PNA_trained_model.pkl",
+                "地上部生物量（AGB，抽穗期）": "抽穗期_晚稻_AGB_trained_model.pkl"
             }
         }
         self.df = None
@@ -200,125 +199,80 @@ class PhenotypeInversionTab(QWidget):
             errors.append("请先选择特征文件")
         elif self.df is None:
             errors.append("文件加载失败，请重新选择文件")
+        else:
+            # 特征列存在性检查（新增关键检查）
+            required_features = {
+                "SPAD": ['RVI', 'NDVI', 'DCNI', 'SA'],
+                "LNA": ['OSAVI', 'MSAVI', 'NDVI', '种植密度'],
+                "PNA": ['MSAVI', 'RDVI', '种植密度', '施氮量'],
+                "AGB": ['株高', '茎粗', 'LAI', 'NDVI']
+            }
+            selected_key = self.get_selected_param().split('（')[1].split('，')[0]
+            features = required_features.get(selected_key, [])
+            missing = [f for f in features if f not in self.df.columns]
+            if missing:
+                errors.append(f"缺失{selected_key}模型必需特征：{', '.join(missing)}")
         
         # 输出路径检查
         if not self.output_entry.text():
             errors.append("请选择输出路径")
         elif not os.path.exists(self.output_entry.text()):
             errors.append("输出路径不存在，请重新选择")
-        
-        # 特征列检查
-        features = self.get_features()
-        if not features:
-            errors.append("至少需要输入一个特征列")
-        else:
-            missing_features = [f for f in features if f not in self.df.columns]
-            if missing_features:
-                errors.append(f"数据中缺失以下特征列：{', '.join(missing_features)}")
 
         if errors:
             QMessageBox.critical(self, "输入错误", "发现以下问题：\n\n• " + "\n• ".join(errors))
             return False
         return True
-
-
+    
     def run_prediction(self):
-        """执行预测流程"""
-        if not self.validate_inputs():
-            return
+            """执行预测流程"""
+            if not self.validate_inputs():
+                return
 
-        progress = QProgressDialog("正在执行预测...", "取消", 0, 100, self)
-        progress.setWindowModality(Qt.WindowModal)
-        
-        try:
-            # 获取选中参数
-            crop_type = "早稻" if self.early_rb.isChecked() else "晚稻"
-            selected_param = self.get_selected_param()
-            model_path = self.models[crop_type][selected_param]
-
-            # 加载模型
-            model = joblib.load(model_path)
-            progress.setValue(30)
+            progress = QProgressDialog("正在执行预测...", "取消", 0, 100, self)
+            progress.setWindowModality(Qt.WindowModal)
             
-            # 准备数据
-            X = self.df[self.get_features()]
-            progress.setValue(50)
-            
-            # 预测
-            predictions = model.predict(X)
-            output_df = self.df.copy()
-            output_df[f"预测_{selected_param}"] = predictions
-            progress.setValue(80)
-            
-            # 保存结果
-            output_dir = self.output_entry.text()
-            output_path = os.path.join(output_dir, f"预测结果_{selected_param}.csv")
-            output_df.to_csv(output_path, index=False)
-            progress.setValue(100)
+            try:
+                # 获取选中参数（关键修改2）
+                crop_type = "早稻" if self.early_rb.isChecked() else "晚稻"
+                selected_param = self.get_selected_param()
+                model_path = self.models[crop_type][selected_param]
 
-            self.operation_completed.emit(output_dir)
-            QMessageBox.information(self, "完成", f"预测结果已保存至：\n{output_path}")
-
-        except Exception as e:
-            QMessageBox.critical(
-                self, "错误", 
-                f"预测失败: {str(e)}\n\n{traceback.format_exc()}"
-            )
-        finally:
-            progress.close()
-        
-    def run_prediction(self):
-        """执行预测流程"""
-        if not self.validate_inputs():
-            return
-
-        progress = QProgressDialog("正在执行预测...", "取消", 0, 100, self)
-        progress.setWindowModality(Qt.WindowModal)
-        
-        try:
-            crop_type = self.crop_type_combo.currentText()
-            selected_params = self.get_selected_params()
-            total = len(selected_params)
-            
-            progress.setMaximum(100)
-            step = 0
-            step_increment = 100 // total if total > 0 else 100
-
-            for param in selected_params:
-                model_path = self.models[crop_type][param]
-                progress.setLabelText(f"正在处理 {param}...")
-                
-                # 加载模型
+                # 加载模型（关键修改3）
+                if not os.path.exists(model_path):
+                    raise FileNotFoundError(f"模型文件未找到：{model_path}")
+                    
                 model = joblib.load(model_path)
-                progress.setValue(step + 20)
+                progress.setValue(30)
                 
                 # 准备数据
                 X = self.df[self.get_features()]
-                progress.setValue(step + 40)
+                progress.setValue(50)
                 
                 # 预测
                 predictions = model.predict(X)
                 output_df = self.df.copy()
-                output_df[f"预测_{param}"] = predictions
-                progress.setValue(step + 70)
+                output_df[f"预测_{selected_param.split('（')[0]}"] = predictions
+                progress.setValue(80)
                 
                 # 保存结果
                 output_dir = self.output_entry.text()
-                output_path = os.path.join(output_dir, f"预测结果_{param}.csv")
-                output_df.to_csv(output_path, index=False)
-                progress.setValue(step + 100)
-                step += step_increment
+                filename = f"{crop_type}_{selected_param.split('（')[1].split('，')[0]}_预测结果.csv"
+                output_path = os.path.join(output_dir, filename)
+                output_df.to_csv(output_path, index=False, encoding='utf-8-sig')
+                progress.setValue(100)
 
-            self.operation_completed.emit(output_dir)
-            QMessageBox.information(self, "完成", "所有预测结果已保存！")
+                self.operation_completed.emit(output_dir)
+                QMessageBox.information(self, "完成", f"预测结果已保存至：\n{output_path}")
 
-        except Exception as e:
-            QMessageBox.critical(
-                self, "错误", 
-                f"预测失败: {str(e)}\n\n{traceback.format_exc()}"
-            )
-        finally:
-            progress.close()
+            except Exception as e:
+                QMessageBox.critical(
+                    self, "错误", 
+                    f"预测失败: {str(e)}\n\n{traceback.format_exc()}"
+                )
+            finally:
+                progress.close()
+
             
     def get_selected_param(self):
         """获取选中的目标参数"""

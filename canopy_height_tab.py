@@ -53,7 +53,7 @@ class CanopyHeightTab(QWidget):
 
         # 百分位数输入
         self.canopy_percent_label = QLabel("冠层DSM百分位数（%）:")
-        self.canopy_percent_edit = QLineEdit("99")
+        self.canopy_percent_edit = QLineEdit("95")
         self.canopy_percent_edit.setFixedWidth(50)
         grid.addWidget(self.canopy_percent_label, 3, 0)
         grid.addWidget(self.canopy_percent_edit, 3, 1)
